@@ -1,0 +1,47 @@
+shadow wallet add -= 0xbc978a397c6f35b8d5b96a88c29f1d22fcfeaba7
+shadow wallet addy owner = 0xc0AE337e367FF5B8eF737d514523760F317b80A5
+shadow wallet contract = https://github.com/indi-gg/platform-monorepo/blob/main/services/wallet/contracts/shadow-wallet/ShadowWallet.sol
+usdt ayush bhai addy =  0xa8811925bFC041160624E0Fdf5F0708F1400721D
+matic on mummatic = 0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889
+
+
+
+shadow wallet 
+
+> get erc 20 balance    done.
+>get erc 721 balance    done.
+>get erc 1155 balance   done.
+> transfer erc 20 token
+> transfer erc 721 token
+> transfer erc 1155 token
+
+
+>erc721 balance
+
+ contract : 0x3a2fc4fA3A331020286790840E1D257964EeF225
+ wallet : 0x0c1e5ed8abd399429aa2dbf586d01038509dc25e
+
+
+> erc 1155 bal
+ contract : 0xa04F0F84d7cF3CA631221203501c543dA641b90c
+ wallet : 0x81841c4648e17db0f4dc7e47195d19b19ba47a66
+ token id : 149
+
+> erc 20 transfer
+    token = 0xa8811925bFC041160624E0Fdf5F0708F1400721D
+    from wallet : 0xbc978a397c6f35b8d5b96a88c29f1d22fcfeaba7
+    to wallet : 0xc0AE337e367FF5B8eF737d514523760F317b80A5
+    link addy : 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+
+> erc 1155 transfer 
+    > token : 0xA07e45A987F19E25176c877d98388878622623FA
+    > from wallet : 0xbc978a397c6f35b8d5b96a88c29f1d22fcfeaba7
+    > to wallet : 0xc0AE337e367FF5B8eF737d514523760F317b80A5
+    > token id : 123
+
+
+
+
+
+
+0x81841c4648e17db0f4dc7e47195d19b19ba47a66
