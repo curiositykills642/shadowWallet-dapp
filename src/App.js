@@ -85,8 +85,8 @@ function App() {
       signer
     ); 
     const balance = await contract.balanceOf(SHADOW_WALLET_ADDRESS);
-    console.log(`ERC20 balance of ${SHADOW_WALLET_ADDRESS} is ${ethers.utils.parseUnits(balance.toString(), '6')}`)
-    setErc20Balance(ethers.utils.parseUnits(balance.toString(), '6').toString());
+    console.log(`ERC20 balance of ${SHADOW_WALLET_ADDRESS} is ${ethers.utils.formatUnits(balance.toString(), '6')}`)
+    setErc20Balance(ethers.utils.formatUnits(balance.toString(), '6').toString());
   } catch (err) {
     console.error("Something went wrong: ", err);
   }
@@ -197,8 +197,8 @@ function App() {
     const balance = await contract.balanceOf(
       defaultAccount
     );
-    console.log(`ERC20 balance of ${defaultAccount} is ${ethers.utils.parseUnits(balance.toString(), '6')}`)
-    setErc20BalanceUser(ethers.utils.parseUnits(balance.toString(), 6).toString());
+    console.log(`ERC20 balance of ${defaultAccount} is ${ethers.utils.formatUnits(balance.toString(), '6')}`)
+    setErc20BalanceUser(ethers.utils.formatUnits(balance.toString(), 6).toString());
     } catch (err) {
       console.error("Something went wrong: ", err);
     }
@@ -255,10 +255,11 @@ function App() {
       swAbi,
       signer
     );
+    const amount = ethers.utils.parseUnits(ERC20_TOKEN_AMOUNT, 6);  
       const tx = await contract.transferERC20Token(
         TEST_ERC20_ADDRESS,
         receiverAddressUser,
-        ERC20_TOKEN_AMOUNT
+        amount
       );
       await tx.wait();
     } catch (err) {
@@ -358,7 +359,7 @@ function App() {
               paddingLeft: "5rem",
             }}
           >
-            <div className="box-1 text-center">Assets in Shadow Wallet</div>
+            <div className="box-1 text-center">Assets in Shadow Wallet (Address: {SHADOW_WALLET_ADDRESS })</div>
             <div className="bg-purple p-4 rounded">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="mb-0">
@@ -443,7 +444,7 @@ function App() {
               paddingLeft: "5rem",
             }}
           >
-            <div className="box-1 text-center">Assets In Connected Wallet</div>
+            <div className="box-1 text-center">Assets in Metamask Wallet (Address: {defaultAccount})</div>
             <div className="bg-purple p-4 rounded">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="mb-0">
