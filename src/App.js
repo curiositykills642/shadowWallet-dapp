@@ -1,260 +1,344 @@
-import './App.css';
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { ethers, SocketProvider } from "ethers";
-import { Navbar, Nav, Container, Row, Col, Card, Button } from 'react-bootstrap';
+import "./App.css";
+import logo from "./logo.png";
+import React, { useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { ethers } from "ethers";
+import {
+  Navbar,
+  Container,
+  Button,
+} from "react-bootstrap";
 import contractAbi20 from "./contractAbi20.json";
 import contractAbi721 from "./contractAbi721.json";
 import contractAbi1155 from "./contractAbi1155.json";
-import swAbi from  "./swAbi.json";
-
+import swAbi from "./swAbi.json";
+import {
+  SHADOW_WALLET_ADDRESS,
+  TEST_ERC20_ADDRESS,
+  TEST_ERC721_ADDRESS,
+  TEST_ERC1155_ADDRESS,
+  ERC1155_GAME_ID,
+  ERC721_TOKEN_ID,
+  ERC20_TOKEN_AMOUNT,
+  ERC1155_TOKEN_AMOUNT
+} from "./config";
 
 // in place of erc20 token address i have added link token address
 
-
 function App() {
-  
-  // cshadow wallet
-  const [message, setMessage] = useState(''); // normal config normal wallet useststes
-  const [defaultAccount, setDefaultAccount] = useState(null);
-  const [connect , setConnect] = useState("Connect Wallet");
+  // Shadow wallet
+  const [message, setMessage] = useState("");
+  const [defaultAccount, setDefaultAccount] = useState("");
+  const [connect, setConnect] = useState("Connect Wallet");
 
-  const [erc20Bal, setErc20Bal] = useState(null); // erc 20 balance reovery
+  const [erc20Balance, setErc20Balance] = useState(""); 
+  const [erc721Balance, setErc721Balance] = useState(""); 
+  const [erc1155Balance, setErc1155Balance] = useState(""); 
+  const [receiverAddress, setReceiverAddress] = useState("");
+  // const [amount, setAmount] = useState("");
+  const [receiverAddress1, setReceiverAddress1] = useState(""); 
+  // const [tokenId721, setTokenId721] = useState("");
+  const [receiverAddress2, setReceiverAddress2] = useState("");
+  // const [amt1, setAmt1] = useState("");
 
-  const [erc721Bal, setErc721Bal ] = useState(''); // erc 721 balance
+  // Connected wallet
+  const [erc20BalanceUser, setErc20BalanceUser] = useState(""); 
+  const [erc721BalanceUser, setErc721BalanceUser] = useState("");
+  const [erc1155BalanceUser, setErc1155BalanceUser] = useState("");
+  const [receiverAddressUser, setReceiverAddressUser] = useState("");
+  // const [amtUser, setAmtUser] = useState("");
+  const [receiverAddress1User, setReceiverAddress1User] = useState("");
+  // const [tokenId721User, setTokenId721User] = useState("");
+  const [receiverAddress2User, setReceiverAddress2User] = useState("");
+  // const [amt1User, setAmt1User] = useState("");
 
-  const [erc1155Bal, setErc1155Bal ] = useState(''); // erc 1155 balance
-
-  const [ recieverAddy , setRecieverAddy] = useState('');
-  const [ amt , setAmt] = useState('');
-
-  const [ erc721Taddy1, setErc721Taddy1] = useState(''); 
-  const [ recieverAddy1 , setRecieverAddy1] = useState(''); // erc 721 transfer.
-  const [ tokenId721 , setTokenId721] = useState('');
-
-  const [ recieverAddy2 , setRecieverAddy2] = useState('');
-  const [ amt1 , setAmt1] = useState('');
-
-  // connected wallet
-  const [erc20Bal_n, setErc20Bal_n] = useState(null); // erc 20 balance reoveryn fonnected wallet use states
-
-  const [erc721Bal_n, setErc721Bal_n ] = useState(''); // erc 721 balance
-
-  const [erc1155Bal_n, setErc1155Bal_n ] = useState(''); // erc 1155 balance
-
-  const [ recieverAddy_n , setRecieverAddy_n] = useState('');
-  const [ amt_n , setAmt_n] = useState('');
-
-  const [ recieverAddy1_n , setRecieverAddy1_n] = useState(''); // erc 721 transfer.
-  const [ tokenId721_n , setTokenId721_n] = useState('');
-
-  const [ recieverAddy2_n , setRecieverAddy2_n] = useState('');
-  const [ amt1_n , setAmt1_n] = useState('');
 
   // metamask wallet connect
   const connectWallet = async () => {
-    if (window.ethereum) { // to detect etherrum provider
+    if (window.ethereum) {
+      // to detect etherrum provider
       try {
-        const accounts = await window.ethereum.request({ // this request connection to metamask
+        const accounts = await window.ethereum.request({
+          // this request connection to metamask
           method: "eth_requestAccounts",
         });
         setDefaultAccount(accounts[0]); // this sets def acc to ac address.
-        console.log(defaultAccount); // just to confirm if correct address is coming.
-        console.log(typeof defaultAccount); // just to confirm what is returned to us
-        setConnect(defaultAccount)
-      } catch (err) {                          // error here means problem while connecting
+        setConnect("Refresh wallet");
+      } catch (err) {
+        // error here means problem while connecting
         console.error(err);
-        setMessage("problem connecting to MetaMask");
+        setMessage("Error connecting to MetaMask");
       }
     } else {
       setMessage("Please Install MetaMask");
     }
-  }
+  };
 
-  // shadow wallet
-  const erc20Balance = async () => {
-
-    const provider = new ethers.providers.Web3Provider(window.ethereum) 
+  // Get ERC20 balance of shadow wallet
+  const getERC20Balance = async () => {
+    try {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-
-    const contract = new ethers.Contract( "0x326C977E6efc84E512bB9C30f76E30c160eD06FB", contractAbi20 , signer); // first arg = erc 20 toekn addy
-    const balance = await contract.balanceOf("0xbc978a397c6f35b8d5b96a88c29f1d22fcfeaba7"); // shadow wallet address.
-
-    setErc20Bal(ethers.utils.formatEther(balance,18));
-    console.log(ethers.utils.formatEther(balance));
+    const contract = new ethers.Contract(
+      TEST_ERC20_ADDRESS,
+      contractAbi20,
+      signer
+    ); 
+    const balance = await contract.balanceOf(SHADOW_WALLET_ADDRESS);
+    console.log(`ERC20 balance of ${SHADOW_WALLET_ADDRESS} is ${ethers.utils.parseUnits(balance.toString(), '6')}`)
+    setErc20Balance(ethers.utils.parseUnits(balance.toString(), '6').toString());
+  } catch (err) {
+    console.error("Something went wrong: ", err);
   }
+  };
 
-  const erc721Balance = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum) 
+  // Get ERC721 balance of shadow wallet
+  const getERC721Balance = async () => {
+    try {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract("0x3a2fc4fA3A331020286790840E1D257964EeF225", contractAbi721 , signer); // first arg = erc 721 addy
-
-    const balance = await contract.balanceOf("0x0c1e5ed8abd399429aa2dbf586d01038509dc25e") // addy = wallet addy , i did not have 721 in shadow wallet so i used random bercause does not really maater
-    setErc721Bal(ethers.utils.formatEther(balance,18));
-    console.log(ethers.utils.formatEther(balance));
+    const contract = new ethers.Contract(
+      TEST_ERC721_ADDRESS,
+      contractAbi721,
+      signer
+    );
+    const balance = await contract.balanceOf(
+      SHADOW_WALLET_ADDRESS
+    );
+    console.log(`ERC721 balance of ${SHADOW_WALLET_ADDRESS} is ${balance.toString()}`)
+    setErc721Balance(balance.toString());
+  } catch (err) {
+    console.error("Something went wrong: ", err);
   }
+  };
 
-  const erc1155Balance = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum) 
+  // Get ERC1155 balance of shadow wallet
+  const getERC1155Balance = async () => {
+    try {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract("0xa07e45a987f19e25176c877d98388878622623fa", contractAbi1155 , signer); // first arg = erc 1155 addy , i have used polygon scan faucet test 1155 token
-
-    const balance = await contract.balanceOf("0xbc978a397c6f35b8d5b96a88c29f1d22fcfeaba7" , "123") // sfirst arg  = " shadow wallet arg" , second arg token id
-    setErc1155Bal(ethers.utils.formatEther(balance,18));
-    console.log(ethers.utils.formatEther(balance));
+    const contract = new ethers.Contract(
+      TEST_ERC1155_ADDRESS,
+      contractAbi1155,
+      signer
+    );
+    const balance = await contract.balanceOf(SHADOW_WALLET_ADDRESS, ERC1155_GAME_ID); 
+    console.log(`ERC1155 balance of ${SHADOW_WALLET_ADDRESS} is ${balance.toString()}`)
+    setErc1155Balance(balance.toString());
+  } catch (err) {
+    console.error("Something went wrong: ", err);
   }
+  };
 
+  // Transfer ERC20 token from shadow wallet
   const erc20Transfer = async () => {
-
-
+    try {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract("0xbc978a397c6f35b8d5b96a88c29f1d22fcfeaba7", swAbi , signer); // first arg = shadow wallet addy 
-
-    // const amount = ethers.utils.parseUnits(amt, 18);  //link works with this usdt wors wirthoug.
-    // console.log(amount.toString());
-
-    try {
-      const tx = await contract.transferERC20Token("0x326C977E6efc84E512bB9C30f76E30c160eD06FB" , recieverAddy , amt); // first arg = erc20 addy
+    const contract = new ethers.Contract(SHADOW_WALLET_ADDRESS, swAbi, signer); 
+    const amount = ethers.utils.parseUnits(ERC20_TOKEN_AMOUNT, 6);  
+      const tx = await contract.transferERC20Token(
+        TEST_ERC20_ADDRESS,
+        receiverAddress,
+        amount
+      );
       await tx.wait();
     } catch (err) {
-      console.error(err);
+      console.error("Something went wrong: ", err);
     }
+  };
 
-  }
-
+  // Transfer ERC721 token from shadow wallet
   const erc721Transfer = async () => {
-
-
+    try {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract("0xbc978a397c6f35b8d5b96a88c29f1d22fcfeaba7", swAbi , signer); // to access shadow wallet.
-
-    try {
-      const tx = await contract.transferERC721Token( erc721Taddy1 , recieverAddy1 , "please enter ur respective token id here" ); // first argument is erc 721 addy i did not test this function because i did not have any efc721 nfts left please do it once i will remind you
+    const contract = new ethers.Contract(SHADOW_WALLET_ADDRESS, swAbi, signer); 
+      const tx = await contract.transferERC721Token(
+        TEST_ERC721_ADDRESS,
+        receiverAddress1,
+        ERC721_TOKEN_ID
+      ); 
       await tx.wait();
     } catch (err) {
-      console.error(err);
+      console.error("Something went wrong: ", err);
     }
+  };
 
-  }
-
+  // Transfer ERC1155 token from shadow wallet
   const erc1155Transfer = async () => {
+    try {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract("0xbc978a397c6f35b8d5b96a88c29f1d22fcfeaba7", swAbi , signer); // to access shadow wallet.
-
-    try {
-      const tx = await contract.transferERC1155Token( "0xa07e45a987f19e25176c877d98388878622623fa" , recieverAddy2 , "123" , amt1 , "0x00"); // 1st arg = erc 1155 addy , 3rd arg = token id , 5th arg call back data 
+    const contract = new ethers.Contract(SHADOW_WALLET_ADDRESS, swAbi, signer);
+      const tx = await contract.transferERC1155Token(
+        TEST_ERC1155_ADDRESS,
+        receiverAddress2,
+        ERC1155_GAME_ID,
+        ERC1155_TOKEN_AMOUNT,
+        "0x00"
+      );
       await tx.wait();
     } catch (err) {
-      console.error(err);
+      console.error("Something went wrong: ", err);
     }
+  };
 
-  }
-
-  // norwal wallet
-  const erc20Balance_n = async () => {
-
-    const provider = new ethers.providers.Web3Provider(window.ethereum) 
-    const signer = provider.getSigner();
-
-    const contract = new ethers.Contract( "0x326C977E6efc84E512bB9C30f76E30c160eD06FB", contractAbi20 , signer); // first arg = erc 20 toekn addy
-    const balance = await contract.balanceOf("0xc0AE337e367FF5B8eF737d514523760F317b80A5"); // normal wallet address.
-
-    setErc20Bal_n(ethers.utils.formatEther(balance,18));
-    console.log(ethers.utils.formatEther(balance));
-  }
-
-  const erc721Balance_n = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum) 
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract("0x3a2fc4fA3A331020286790840E1D257964EeF225", contractAbi721 , signer); // first arg = erc 721 addy
-
-    const balance = await contract.balanceOf("0x0c1e5ed8abd399429aa2dbf586d01038509dc25e") // addy = wallet addy , i did not have 721 in shadow wallet so i used random bercause does not really maater
-    setErc721Bal_n(ethers.utils.formatEther(balance,18));
-    console.log(ethers.utils.formatEther(balance));
-  }
-
-  const erc1155Balance_n = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum) 
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract("0xa07e45a987f19e25176c877d98388878622623fa", contractAbi1155 , signer); // first arg = erc 1155 addy , i have used polygon scan faucet test 1155 token
-
-    const balance = await contract.balanceOf("0xc0AE337e367FF5B8eF737d514523760F317b80A5" , "123") // sfirst arg  = " connected wallet arg" , second arg token id
-    setErc1155Bal_n(ethers.utils.formatEther(balance,18));
-    console.log(ethers.utils.formatEther(balance));
-  }
-
-  const erc20Transfer_n = async () => {
-
-
+  // Get ERC20 balance of the user
+  const getERC20BalanceUser = async () => {
+    try {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract("0xc0AE337e367FF5B8eF737d514523760F317b80A5", swAbi , signer); // first arg = shadow wallet addy 
-
-    // const amount = ethers.utils.parseUnits(amt, 18);  //link works with this usdt wors wirthoug.
-    // console.log(amount.toString());
-
-    try {
-      const tx = await contract.transferERC20Token("0x326C977E6efc84E512bB9C30f76E30c160eD06FB" , recieverAddy_n , amt_n); // first arg = erc20 addy
-      await tx.wait();
+    const contract = new ethers.Contract(
+      TEST_ERC20_ADDRESS,
+      contractAbi20,
+      signer
+    );
+    const balance = await contract.balanceOf(
+      defaultAccount
+    );
+    console.log(`ERC20 balance of ${defaultAccount} is ${ethers.utils.parseUnits(balance.toString(), '6')}`)
+    setErc20BalanceUser(ethers.utils.parseUnits(balance.toString(), 6).toString());
     } catch (err) {
-      console.error(err);
+      console.error("Something went wrong: ", err);
     }
+  };
 
-  }
-
-  const erc721Transfer_n = async () => {
-
-
+  // Get ERC721 balance of the user
+  const getERC721BalanceUser = async () => {
+    try {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract("0xc0AE337e367FF5B8eF737d514523760F317b80A5", swAbi , signer); // to access shadow wallet.
-
-    try {
-      const tx = await contract.transferERC721Token( erc721Taddy1 , recieverAddy1 , "please enter ur respective token id here" ); // first argument is erc 721 addy i did not test this function because i did not have any efc721 nfts left please do it once i will remind you
-      await tx.wait();
-    } catch (err) {
-      console.error(err);
-    }
-
+    const contract = new ethers.Contract(
+      TEST_ERC721_ADDRESS,
+      contractAbi721,
+      signer
+    );
+    const balance = await contract.balanceOf(
+      defaultAccount
+    );
+    console.log(`ERC721 balance of ${defaultAccount} is ${balance.toString()}`);
+    setErc721BalanceUser(balance.toString());
+  } catch (err) {
+    console.error("Something went wrong: ", err);
   }
+  };
 
-  const erc1155Transfer_n = async () => {
+  // Get ERC1155 balance of the user
+  const getERC1155BalanceUser = async () => {
+    try {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract("0xa07e45a987f19e25176c877d98388878622623fa", swAbi , signer); // to access shadow wallet.
+    const contract = new ethers.Contract(
+      TEST_ERC1155_ADDRESS,
+      contractAbi1155,
+      signer
+    );
+    const balance = await contract.balanceOf(
+      defaultAccount,
+      ERC1155_GAME_ID
+    );
+    console.log(`ERC1155 balance of ${defaultAccount} is ${balance.toString()}`);
+    setErc1155BalanceUser(balance.toString());
+  } catch (err) {
+    console.error("Something went wrong: ", err);
+  }
+  };
 
+  // Transfer ERC20 token from shadow wallet
+  const erc20TransferUser = async () => {
     try {
-      const tx = await contract.transferERC1155Token( "0xa07e45a987f19e25176c877d98388878622623fa" , recieverAddy2_n , "123" , amt1_n , "0x00"); // 1st arg = erc 1155 addy , 3rd arg = token id , 5th arg call back data 
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(
+      SHADOW_WALLET_ADDRESS,
+      swAbi,
+      signer
+    );
+      const tx = await contract.transferERC20Token(
+        TEST_ERC20_ADDRESS,
+        receiverAddressUser,
+        ERC20_TOKEN_AMOUNT
+      );
       await tx.wait();
     } catch (err) {
-      console.error(err);
+      console.error("Something went wrong: ", err);
     }
+  };
 
-  }
+  // Transfer ERC721 token from shadow wallet
+  const erc721TransferUser = async () => {
+    try {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(
+      SHADOW_WALLET_ADDRESS,
+      swAbi,
+      signer
+    );
+      const tx = await contract.transferERC721Token(
+        TEST_ERC721_ADDRESS,
+        receiverAddress1,
+        ERC721_TOKEN_ID
+      );
+      await tx.wait();
+    } catch (err) {
+      console.error("Something went wrong: ", err);
+    }
+  };
+
+  // Transfer ERC1155 token from shadow wallet
+  const erc1155TransferUser = async () => {
+    try {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(TEST_ERC1155_ADDRESS, swAbi, signer); // to access shadow wallet.
+      const tx = await contract.transferERC1155Token(
+        TEST_ERC1155_ADDRESS,
+        receiverAddress2User,
+        ERC1155_GAME_ID,
+        ERC1155_TOKEN_AMOUNT,
+        "0x00"
+      );
+      await tx.wait();
+    } catch (err) {
+      console.error("Something went wrong: ", err);
+    }
+  };
 
   return (
     <>
-      {/* header wala part*/}
-      <div>   
+      {/* HEADER */}
+      <div>
         <Navbar bg="black" variant="dark" expand="lg">
           <Container>
             <div className="me-auto">
-              <Navbar.Brand>Shadow Wallet Dashboard</Navbar.Brand>
+              <img
+                src={logo}
+                alt="Site Logo"
+                style={{ width: "50px", height: "auto" }}
+              ></img>
+              <Navbar.Brand>Shadow Wallet Demo</Navbar.Brand>
             </div>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-              <Button onClick={() => connectWallet()} variant="light" style={{ backgroundColor: 'white', fontWeight: '500' }}>{connect}</Button>
+            <Navbar.Collapse
+              id="basic-navbar-nav"
+              className="justify-content-end"
+            >
+              <Button
+                onClick={() => connectWallet()}
+                variant="light"
+                style={{ backgroundColor: "white", fontWeight: "500" }}
+              >
+                {connect}
+              </Button>
             </Navbar.Collapse>
           </Container>
         </Navbar>
       </div>
-          
-      {/* account info wala part */}
-      <div>  
+
+      {/* Account Info */}
+      <div>
         <Container>
           <div className="mt-4 p-3 border text-center">
             <p className="fw-bold mb-0">Connected Account : {defaultAccount}</p>
@@ -262,86 +346,178 @@ function App() {
         </Container>
       </div>
 
-      {/* body wala part */}
+      {/* BODY */}
       <div>
         <div className="row">
-          
-          <div className="col-md-6 text-center bg-bl border" style={{ paddingTop: '4rem', paddingBottom: '2rem', backgroundColor: 'white',paddingLeft: '5rem'}}>
-            <div className="box-1">Assets In Shadow Wallet</div>
+          <div
+            className="col-md-6 text-center bg-bl border"
+            style={{
+              paddingTop: "4rem",
+              paddingBottom: "2rem",
+              backgroundColor: "white",
+              paddingLeft: "5rem",
+            }}
+          >
+            <div className="box-1 text-center">Assets in Shadow Wallet</div>
             <div className="bg-purple p-4 rounded">
-
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="mb-0">
-                  Erc 20 balance  
-                  <button onClick={() => erc20Balance()}> {erc20Bal} </button>
+                  ERC20 balance &nbsp;
+                  <Button onClick={() => getERC20Balance()}> 
+                    {erc20Balance ? erc20Balance : "Get"} 
+                  </Button>
                 </h5>
-                <input value={recieverAddy} placeholder="reciever addy" type="text" onChange={(e) => setRecieverAddy(e.target.value)} />
-                <input value={amt} placeholder="token amt" type="text" onChange={(e) => setAmt(e.target.value)} />
-                <Button variant="primary" onClick={ () => erc20Transfer()}>Transfer Token</Button>
+                <input
+                  value={receiverAddress}
+                  placeholder="receiver address"
+                  type="text"
+                  onChange={(e) => setReceiverAddress(e.target.value)}
+                />
+                {/* <input
+                  value={amount}
+                  placeholder="token amount"
+                  type="text"
+                  onChange={(e) => setAmount(ERC20_TOKEN_AMOUNT)}
+                /> */}
+                <Button variant="primary" onClick={() => erc20Transfer()}>
+                  Transfer Token
+                </Button>
               </div>
 
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="mb-0">
-                  Erc 721 balance
-                  <button onClick={() => erc721Balance()}> {erc721Bal} </button>
+                  ERC721 balance &nbsp;
+                  <Button onClick={() => getERC721Balance()}> 
+                    {erc721Balance ? erc721Balance : "Get"} 
+                  </Button>
                 </h5>
-                <input value={recieverAddy1} placeholder="reciever addy" type="text" onChange={(e) => setRecieverAddy1(e.target.value)} />
-                <input value={tokenId721} placeholder="token id" type="text" onChange={(e) => setTokenId721(e.target.value)} />
-                <Button variant="primary" onClick={ () => erc721Transfer()}>Transfer NFT</Button>
+                <input
+                  value={receiverAddress1}
+                  placeholder="receiver address"
+                  type="text"
+                  onChange={(e) => setReceiverAddress1(e.target.value)}
+                />
+                {/* <input
+                  value={tokenId721}
+                  placeholder="token id"
+                  type="text"
+                  onChange={(e) => setTokenId721(e.target.value)}
+                /> */}
+                <Button variant="primary" onClick={() => erc721Transfer()}>
+                  Transfer NFT
+                </Button>
               </div>
 
               <div className="d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">
-                  Erc 1155 balance
-                  <button onClick={() => erc1155Balance()}> {erc1155Bal} </button>
+                  ERC1155 balance &nbsp;
+                  <Button onClick={() => getERC1155Balance()}>
+                    {erc1155Balance ? erc1155Balance : "Get"}
+                  </Button>
                 </h5>
-                <input value={recieverAddy2} placeholder="reciever addy" type="text" onChange={(e) => setRecieverAddy2(e.target.value)} />
-                <input value={amt1} placeholder="token amt" type="text" onChange={(e) => setAmt1(e.target.value)} />
-                <Button variant="primary" onClick={() => erc1155Transfer()}>Transfer SFT</Button>
+                <input
+                  value={receiverAddress2}
+                  placeholder="receiver address"
+                  type="text"
+                  onChange={(e) => setReceiverAddress2(e.target.value)}
+                />
+                {/* <input
+                  value={amt1}
+                  placeholder="token amount"
+                  type="text"
+                  onChange={(e) => setAmt1(e.target.value)}
+                /> */}
+                <Button variant="primary" onClick={() => erc1155Transfer()}>
+                  Transfer SFT
+                </Button>
               </div>
             </div>
           </div>
 
-
-
-
-          <div className="col-md-6 text-center bg-bl border" style={{ paddingTop: '4rem', paddingBottom: '2rem', backgroundColor: 'white',paddingLeft: '5rem'}}>
-            <div className="box-1">Assets In Connected Wallet</div>
+          <div
+            className="col-md-6 text-center bg-bl border"
+            style={{
+              paddingTop: "4rem",
+              paddingBottom: "2rem",
+              backgroundColor: "white",
+              paddingLeft: "5rem",
+            }}
+          >
+            <div className="box-1 text-center">Assets In Connected Wallet</div>
             <div className="bg-purple p-4 rounded">
-
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="mb-0">
-                  Erc 20 balance  
-                  <button onClick={() => erc20Balance_n()}> {erc20Bal_n} </button>
+                  ERC20 balance &nbsp;
+                  <Button onClick={() => getERC20BalanceUser()}>
+                    {erc20BalanceUser ? erc20BalanceUser : "Get"}
+                  </Button>
                 </h5>
-                <input value={recieverAddy_n} placeholder="reciever addy" type="text" onChange={(e) => setRecieverAddy_n(e.target.value)} />
-                <input value={amt_n} placeholder="token amt" type="text" onChange={(e) => setAmt_n(e.target.value)} />
-                <Button variant="primary" onClick={ () => erc20Transfer_n()}>Transfer Token</Button>
+                <input
+                  value={receiverAddressUser}
+                  placeholder="receiver address"
+                  type="text"
+                  onChange={(e) => setReceiverAddressUser(e.target.value)}
+                />
+                {/* <input
+                  value={amtUser}
+                  placeholder="token amount"
+                  type="text"
+                  onChange={(e) => setAmtUser(e.target.value)}
+                /> */}
+                <Button variant="primary" onClick={() => erc20TransferUser()}>
+                  Transfer Token
+                </Button>
               </div>
 
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="mb-0">
-                  Erc 721 balance
-                  <button onClick={() => erc721Balance_n()}> {erc721Bal_n} </button>
+                  ERC721 balance &nbsp;
+                  <Button onClick={() => getERC721BalanceUser()}>
+                    {erc721BalanceUser ? erc721BalanceUser: "Get"}
+                  </Button>
                 </h5>
-                <input value={recieverAddy1_n} placeholder="reciever addy" type="text" onChange={(e) => setRecieverAddy1_n(e.target.value)} />
-                <input value={tokenId721_n} placeholder="token id" type="text" onChange={(e) => setTokenId721_n(e.target.value)} />
-                <Button variant="primary" onClick={ () => erc721Transfer_n()}>Transfer NFT</Button>
+                <input
+                  value={receiverAddress1User}
+                  placeholder="receiver address"
+                  type="text"
+                  onChange={(e) => setReceiverAddress1User(e.target.value)}
+                />
+                {/* <input
+                  value={tokenId721User}
+                  placeholder="token id"
+                  type="text"
+                  onChange={(e) => setTokenId721User(e.target.value)}
+                /> */}
+                <Button variant="primary" onClick={() => erc721TransferUser()}>
+                  Transfer NFT
+                </Button>
               </div>
 
               <div className="d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">
-                  Erc 1155 balance
-                  <button onClick={() => erc1155Balance_n()}> {erc1155Bal_n} </button>
+                  ERC1155 balance &nbsp;
+                  <Button onClick={() => getERC1155BalanceUser()}>
+                    {erc1155BalanceUser ? erc1155BalanceUser : "Get"}
+                  </Button>
                 </h5>
-                <input value={recieverAddy2_n} placeholder="reciever addy" type="text" onChange={(e) => setRecieverAddy2_n(e.target.value)} />
-                <input value={amt1_n} placeholder="token amt" type="text" onChange={(e) => setAmt1_n(e.target.value)} />
-                <Button variant="primary" onClick={() => erc1155Transfer_n()}>Transfer SFT</Button>
+                <input
+                  value={receiverAddress2User}
+                  placeholder="receiver address"
+                  type="text"
+                  onChange={(e) => setReceiverAddress2User(e.target.value)}
+                />
+                {/* <input
+                  value={amt1User}
+                  placeholder="token amount"
+                  type="text"
+                  onChange={(e) => setAmt1User(e.target.value)}
+                /> */}
+                <Button variant="primary" onClick={() => erc1155TransferUser()}>
+                  Transfer SFT
+                </Button>
               </div>
             </div>
           </div>
-
-          
         </div>
       </div>
     </>
